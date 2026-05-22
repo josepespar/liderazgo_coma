@@ -1,0 +1,22 @@
+/* ld-style.css — Overrides específicos de LearnDash. Se carga DESPUÉS de style.css. */
+
+#ltq-wrapper { position: relative; overflow: hidden; }
+#ltq-wrapper #hud { position: sticky; top: 0; z-index: 200; }
+#ltq-wrapper #layout { position: relative; }
+#ltq-wrapper #temp-sidebar, #ltq-wrapper #right-panel { position: absolute; top: 56px; bottom: 0; }
+#ltq-wrapper #temp-sidebar { left: 0; }
+#ltq-wrapper #right-panel  { right: 0; }
+
+.learndash-wrapper #ltq-wrapper *, .ld-course-status #ltq-wrapper * { box-sizing: border-box; }
+
+/* Ocultar botón "Marcar como completado" de LD mientras el módulo está activo */
+#ltq-wrapper ~ .learndash_mark_complete_button,
+#ltq-wrapper ~ #learndash_mark_complete_button { display: none; }
+
+/* Barra de progreso LD sincronizada */
+.ltq-ld-progress-sync .ld-progress-bar-percentage { transition: width 0.4s ease; }
+
+/* Tipografía */
+#ltq-wrapper, #ltq-wrapper * { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; line-height: inherit; }
+
+.btn-restart { display: block; margin: 1.5rem auto 0; }
