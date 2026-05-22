@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>El Liderazgo que Transforma</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@1,400;1,700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       HUD SUPERIOR
+  ═══════════════════════════════════════════ -->
+  <header id="hud">
+    <div id="hud-left">
+      <span class="hud-label">ESCENA</span>
+      <span id="hud-progress-text" class="hud-value">1 / 10</span>
+      <div id="hud-progress-track">
+        <div id="hud-progress-bar"></div>
+      </div>
+    </div>
+
+    <div id="hud-center">
+      <div id="hud-title-block">
+        <span id="hud-course-title">El Liderazgo que Transforma</span>
+      </div>
+    </div>
+
+    <div id="hud-right">
+      <span class="hud-label">PUNTUACIÓN</span>
+      <span id="hud-score" class="hud-value">0 pts</span>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════
+       LAYOUT PRINCIPAL
+  ═══════════════════════════════════════════ -->
+  <div id="layout">
+
+    <!-- Temperatura del grupo — barra lateral izquierda -->
+    <aside id="temp-sidebar">
+      <span class="sidebar-label">GRUPO</span>
+      <div id="temp-bar-track">
+        <div id="temp-fill"></div>
+      </div>
+      <div id="temp-info">
+        <span id="temp-icon">🟡</span>
+        <span id="temp-label">Tenso</span>
+      </div>
+    </aside>
+
+    <!-- Contenedor de escena -->
+    <main id="scene-container">
+      <!-- Las escenas se renderizan aquí por JS -->
+    </main>
+
+    <!-- Panel derecho: minimapa + tracker -->
+    <aside id="right-panel">
+      <!-- Minimapa -->
+      <div id="minimap">
+        <span class="sidebar-label">RUTA</span>
+        <div class="mm-tree">
+          <div data-scene="E01" class="mm-node">E01</div>
+          <div class="mm-connector"></div>
+          <div data-scene="E02" class="mm-node">E02</div>
+          <div class="mm-connector"></div>
+          <div data-scene="E03" class="mm-node">E03</div>
+          <div class="mm-fork">
+            <div class="mm-branch-a">
+              <div data-scene="E04" class="mm-node">E04</div>
+              <div class="mm-connector"></div>
+              <div data-scene="E05" class="mm-node">E05</div>
+            </div>
+            <div class="mm-branch-b">
+              <div data-scene="E03b" class="mm-node mm-branch">E03b</div>
+            </div>
+          </div>
+          <div class="mm-connector"></div>
+          <div data-scene="E06" class="mm-node">E06</div>
+          <div class="mm-connector"></div>
+          <div data-scene="E07" class="mm-node mm-star">E07★</div>
+          <div class="mm-connector"></div>
+          <div data-scene="E08" class="mm-node">E08</div>
+          <div class="mm-connector"></div>
+          <div data-scene="E09" class="mm-node">E09</div>
+          <div class="mm-connector"></div>
+          <div data-scene="E10" class="mm-node mm-star">E10★</div>
+        </div>
+      </div>
+
+      <!-- Tracker de decisiones -->
+      <div id="decision-tracker-block">
+        <span class="sidebar-label">ÚLTIMAS DECISIONES</span>
+        <div id="decision-tracker"></div>
+      </div>
+    </aside>
+
+  </div><!-- /layout -->
+
+  <script src="js/scorm.js"></script>
+  <script src="js/scenario.js"></script>
+</body>
+</html>
