@@ -1,28 +1,31 @@
-/* scenario.js — Engine narrativo IIFE. Sin dependencias externas. */
+/* scenario.js — Engine narrativo IIFE. Sin dependencias externas.
+   v2 — fixes: transición opacity, quiz/dragdrop hardcoded scenes,
+        E06 secuencial, countdown post-timer, lector 30s antiavance. */
 (function () {
   'use strict';
 
-  /* ════════════════════════════════════════════════
+  /* ══════════════════════════════════════════════════════
      CONSTANTES
-  ════════════════════════════════════════════════ */
+  ══════════════════════════════════════════════════════ */
   var CANONICAL_SCENE_COUNT = 10;
   var BRANCH_SCENES = ['E03b', 'E06b', 'E09b', 'E09c'];
+  var READING_SECONDS = 30;   /* antiavance: bloquea actividades N segundos */
 
   var BADGE_DEFS = {
-    B_RESIST:   { id: 'B_RESIST',   label: 'Autenticidad bajo presión',   icon: '🛡' },
-    B_LISTEN:   { id: 'B_LISTEN',   label: 'Escucha activa',              icon: '👂' },
-    B_EMPATH:   { id: 'B_EMPATH',   label: 'Inteligencia emocional',      icon: '💙' },
-    B_EVIDENCE: { id: 'B_EVIDENCE', label: 'Liderazgo basado en evidencia',icon: '📊' },
-    B_COURAGE:  { id: 'B_COURAGE',  label: 'Decisión valiente',           icon: '⚡' }
+    B_RESIST:   { id: 'B_RESIST',   label: 'Autenticidad bajo presión',    icon: '🛡' },
+    B_LISTEN:   { id: 'B_LISTEN',   label: 'Escucha activa',               icon: '👂' },
+    B_EMPATH:   { id: 'B_EMPATH',   label: 'Inteligencia emocional',       icon: '💙' },
+    B_EVIDENCE: { id: 'B_EVIDENCE', label: 'Liderazgo basado en evidencia', icon: '📊' },
+    B_COURAGE:  { id: 'B_COURAGE',  label: 'Decisión valiente',            icon: '⚡' }
   };
 
   var TEMP_LABELS = ['Roto', 'Fracturado', 'Tenso', 'Activo', 'Conectado'];
   var TEMP_COLORS = ['#C0392B', '#E67E22', '#F1C40F', '#27AE60', '#1A6EFF'];
   var TEMP_ICONS  = ['🔴', '🟠', '🟡', '🟢', '🔵'];
 
-  /* ════════════════════════════════════════════════
+  /* ══════════════════════════════════════════════════════
      ESTADO GLOBAL
-  ════════════════════════════════════════════════ */
+  ══════════════════════════════════════════════════════ */
   var STATE = {
     currentScene: 'E01',
     score: 0,
@@ -36,9 +39,9 @@
     completed: false
   };
 
-  /* ════════════════════════════════════════════════
-     CONTENIDO NARRATIVO — ESCENAS
-  ════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════
+     ESCENAS
+  ══════════════════════════════════════════════════════ */
   var SCENES = {
 
     /* ── E01 ── */
@@ -53,7 +56,7 @@
         'Jordi Coma entra a la sala con su portátil bajo el brazo y una taza de café que ya se ha enfriado. Recorre el espacio con la mirada: cinco entrenadores. Cinco biografías de resistencia. Cinco razones para no estar aquí.',
         'Nadie aplaude. Nadie sonríe. Marc tamborilea sobre la mesa con el bolígrafo. Jack examina sus propias notas como si ya supiera lo que viene. Elena recoloca sus papeles por tercera vez.',
         'Jordi deja el café sobre la mesa. No abre el portátil.',
-        '"Antes de empezar —dice—, necesito que alguien me diga por qué está aquí. Y no me vale 'porque me lo mandaron'."',
+        '"Antes de empezar —dice—, necesito que alguien me diga por qué está aquí. Y no me vale \'porque me lo mandaron\'."',
         'El silencio dura cuatro segundos. Cuatro segundos que pesan como cuatro años.',
         'Nadie levanta la mano.'
       ],
@@ -69,9 +72,7 @@
           saveAndAdvance('E02');
         }
       },
-      pedagogical: 'Conducta observable inicial del grupo vs. conducta requerida (Chelladurai, 1984).',
-      hookLine: 'El silencio no es ausencia de respuesta. Es la respuesta.',
-      next: 'E02'
+      hookLine: 'El silencio no es ausencia de respuesta. Es la respuesta.'
     },
 
     /* ── E02 ── */
@@ -103,12 +104,10 @@
       activity: {
         type: 'info',
         prompt: 'Lee el modelo. Cuando estés listo para ver cómo se rompe en la práctica, continúa.',
-        buttonLabel: 'Continuar',
-        onSelect: function () { saveAndAdvance('E03'); }
+        buttonLabel: 'Continuar →',
+        next: 'E03'
       },
-      pedagogical: 'Presentación del marco teórico antes del conflicto. Único momento donde la teoría precede a la emoción.',
-      hookLine: 'Un modelo no sirve para explicar el pasado. Sirve para sobrevivir el presente.',
-      next: 'E03'
+      hookLine: 'Un modelo no sirve para explicar el pasado. Sirve para sobrevivir el presente.'
     },
 
     /* ── E03 ── */
@@ -157,7 +156,6 @@
           }
         ]
       },
-      pedagogical: 'Gestión de la resistencia. Congruencia entre conducta real y requerida.',
       hookLine: 'El líder que no cede cuando debe mantenerse es el líder que sabe quién es.',
       temperatureChange: { D1_A: 0, D1_B: -1, D1_C: -1 }
     },
@@ -182,11 +180,9 @@
         type: 'info',
         prompt: 'El grupo sigue adelante, pero algo se ha roto. Continúa.',
         buttonLabel: 'Continuar — Ruta B',
-        onSelect: function () { saveAndAdvance('E04'); }
+        next: 'E04'
       },
-      pedagogical: 'Consecuencia de la falta de congruencia entre conducta real y requerida.',
-      hookLine: 'Ceder una vez no es una decisión. Es un precedente.',
-      next: 'E04'
+      hookLine: 'Ceder una vez no es una decisión. Es un precedente.'
     },
 
     /* ── E04 ── */
@@ -217,21 +213,16 @@
         ],
         correctOrder: ['dd_2', 'dd_3', 'dd_1', 'dd_4'],
         feedback: 'El orden de Gery refleja el modelo de Chelladurai: la conducta de apoyo precede a la conducta de rendimiento. Exigir antes de confiar genera obediencia, no transformación.',
-        onComplete: function (order) {
-          STATE.decisions.push({ scene: 'E04', type: 'dragdrop', value: order });
-          saveAndAdvance('E05');
-        }
+        next: 'E05'
       },
-      pedagogical: 'Conducta de apoyo vs. conducta de rendimiento. La madurez percibida vs. real (Chelladurai).',
-      hookLine: 'La gente no sigue a quien tiene razón. Sigue a quien confía en ellos primero.',
-      next: 'E05'
+      hookLine: 'La gente no sigue a quien tiene razón. Sigue a quien confía en ellos primero.'
     },
 
     /* ── E05 ── */
     E05: {
       id: 'E05', canonical: true, canonicalIndex: 5,
       title: 'La Evidencia',
-      act: 'La Prueba · Acto II — Hallazgo del Artículo',
+      act: 'La Prueba · Acto II',
       emotionIcon: 'apertura',
       imatge: null,
       narrative: [
@@ -256,9 +247,7 @@
           saveAndAdvance('E06');
         }
       },
-      pedagogical: 'Hallazgo contraintuitivo: la conducta de apoyo tiene mayor impacto en el rendimiento a largo plazo que la conducta directiva.',
-      hookLine: 'El liderazgo no se mide en la temporada. Se mide en la siguiente.',
-      next: 'E06'
+      hookLine: 'El liderazgo no se mide en la temporada. Se mide en la siguiente.'
     },
 
     /* ── E06 ── */
@@ -279,27 +268,25 @@
         'Lo enseñará todo.'
       ],
       quote: '"La inteligencia emocional de un líder no se activa cuando el grupo está bien. Se activa cuando alguien está roto y nadie más lo ha visto."',
+      /* Actividad principal: leer el subtexto */
       activity: {
         type: 'subtextIdentify',
-        prompt: 'Antes de decidir qué hace Jordi, observa las reacciones del grupo. ¿Quién miente, quién necesita ayuda, quién está a punto de irse?',
+        prompt: 'Antes de decidir qué hace Jordi, observa las reacciones del grupo.',
         characters: [
-          { name: 'Elena', reaction: 'Recoloca los papeles. Sonríe cuando Jordi la mira. Aprieta el bolígrafo.', truth: 'necesita_ayuda' },
-          { name: 'Marc', reaction: 'Revisa el móvil. Suspira. Tamborileo de dedos aumenta.', truth: 'a_punto_de_irse' },
-          { name: 'Nadia', reaction: 'Mira a Elena. Mira a Jordi. Espera.', truth: 'observa_y_sabe' }
+          { name: 'Elena',  reaction: 'Recoloca los papeles. Sonríe cuando Jordi la mira. Aprieta el bolígrafo.', truth: 'necesita_ayuda' },
+          { name: 'Marc',   reaction: 'Revisa el móvil. Suspira. Tamborileo de dedos aumenta.',                  truth: 'a_punto_de_irse' },
+          { name: 'Nadia',  reaction: 'Mira a Elena. Mira a Jordi. Espera.',                                     truth: 'observa_y_sabe' }
         ],
-        correctMap: { Elena: 'necesita_ayuda', Marc: 'a_punto_de_irse', Nadia: 'observa_y_sabe' },
-        onComplete: function (result) {
-          STATE.decisions.push({ scene: 'E06', type: 'subtext', value: result });
-          /* unlock hidden info */
-        }
+        correctMap: { Elena: 'necesita_ayuda', Marc: 'a_punto_de_irse', Nadia: 'observa_y_sabe' }
       },
+      /* Actividad de decisión: se inyecta en DOM DESPUÉS de confirmar subtext */
       decisionActivity: {
         type: 'decision',
         prompt: '¿Qué hace Jordi?',
         options: [
           {
             id: 'D2_A', label: 'Nombra lo que ve, con cuidado',
-            text: '"Elena, antes de continuar: ¿estás bien?" No en voz alta. En voz baja. Solo para ella. Pausa el grupo un momento.',
+            text: '"Elena, antes de continuar: ¿estás bien?" No en voz alta. En voz baja. Solo para ella.',
             score: 25, badge: 'B_EMPATH', nextScene: 'E07', routeTag: 'A',
             feedback: 'Jordi ejerce conducta de apoyo individualizada. Chelladurai distingue entre conducta orientada al grupo y conducta individualizada. Nombrar la realidad emocional de alguien es el primer acto de liderazgo transformacional real.',
             feedbackConcept: 'Chelladurai: Conducta de apoyo individualizada → satisfacción y madurez creciente del miembro.'
@@ -315,15 +302,13 @@
             id: 'D2_C', label: 'Hace una pausa para el grupo entero',
             text: '"Vamos a parar dos minutos. Respirad. Esto que estamos haciendo hoy es exigente."',
             score: 10, badge: null, nextScene: 'E07', routeTag: 'A',
-            feedback: 'Jordi protege a Elena sin singularizarla. No es la opción más valiente, pero es la más inteligente si no confías en que ella quiera ser nombrada.',
+            feedback: 'Jordi protege a Elena sin singularizarla. Es la opción más inteligente si no confías en que ella quiera ser nombrada.',
             feedbackConcept: 'Chelladurai: Conducta de apoyo grupal → reduce la tensión colectiva, aunque no resuelve la individual.'
           }
         ]
       },
-      pedagogical: 'Inteligencia emocional como conducta de apoyo. Clima de grupo como variable del rendimiento.',
       hookLine: 'Ver a alguien no es mirarle. Es decidir que lo que siente importa.',
-      temperatureChange: { D2_A: 1, D2_B: -1, D2_C: 0 },
-      next: { D2_A: 'E07', D2_B: 'E06b', D2_C: 'E07' }
+      temperatureChange: { D2_A: 1, D2_B: -1, D2_C: 0 }
     },
 
     /* ── E06b ── */
@@ -346,11 +331,9 @@
         type: 'info',
         prompt: 'El grupo llega a E07 con una grieta invisible. Continúa.',
         buttonLabel: 'Continuar',
-        onSelect: function () { saveAndAdvance('E07'); }
+        next: 'E07'
       },
-      pedagogical: 'Coste de la omisión en conducta de apoyo.',
-      hookLine: 'No ver no es neutralidad. Es elección.',
-      next: 'E07'
+      hookLine: 'No ver no es neutralidad. Es elección.'
     },
 
     /* ── E07 ── */
@@ -375,11 +358,11 @@
       alternativePath: {
         forRouteA: {
           title: 'Lo que habría pasado si hubieras cedido',
-          text: 'Si Jordi hubiera cedido ante Jack en E03, la tarde habría comenzado con Jack en el centro de la sala. No como facilitador: como evidencia viva de que la resistencia funciona. El grupo habría aprendido que el liderazgo se mide por quién sobrevive al desafío, no por quién lo transforma. Elena habría desaparecido en silencio durante el break. Gery no habría hablado. Marc habría salido convencido de que ya sabía todo lo que necesitaba saber. Jordi habría llegado a esta pausa no con una pregunta sobre su propósito, sino con una acusación hacia sí mismo: "he fallado". Y esa diferencia —entre dudar y acusarse— es la diferencia entre un líder en proceso y un líder que ha parado de crecer. No es una condena. Es un espejo. Y los espejos solo sirven si te atreves a mirarlos.'
+          text: 'Si Jordi hubiera cedido ante Jack en E03, la tarde habría comenzado con Jack en el centro de la sala. No como facilitador: como evidencia viva de que la resistencia funciona. El grupo habría aprendido que el liderazgo se mide por quién sobrevive al desafío, no por quién lo transforma. Elena habría desaparecido en silencio durante el break. Gery no habría hablado. Marc habría salido convencido de que ya sabía todo lo que necesitaba saber. Jordi habría llegado a esta pausa no con una pregunta sobre su propósito, sino con una acusación hacia sí mismo: "he fallado". Y esa diferencia —entre dudar y acusarse— es la diferencia entre un líder en proceso y un líder que ha parado de crecer.'
         },
         forRouteB: {
           title: 'Lo que habría pasado si hubieras mantenido tu posición',
-          text: 'Si Jordi hubiera sostenido su posición ante Jack en E03, esta pausa del almuerzo habría sido diferente. No mejor, necesariamente. Pero diferente. Gery habría hablado en E04 porque habría habido espacio para hablar. Elena habría tenido al menos la posibilidad de ser vista. Marc habría dejado el bolígrafo sobre la mesa. El grupo habría llegado aquí con una tensión diferente: no la tensión del vacío, sino la tensión de algo que todavía puede romperse en luz o en oscuridad. Esa posibilidad todavía existe. La tarde no ha terminado. Las decisiones del pasado se quedan en el pasado. Lo que viene ahora puede ser diferente, si quieres que lo sea.'
+          text: 'Si Jordi hubiera sostenido su posición ante Jack en E03, esta pausa del almuerzo habría sido diferente. Gery habría hablado porque habría habido espacio para hablar. Elena habría tenido al menos la posibilidad de ser vista. Marc habría dejado el bolígrafo sobre la mesa. El grupo habría llegado aquí con una tensión diferente: no la tensión del vacío, sino la tensión de algo que todavía puede romperse en luz o en oscuridad. Esa posibilidad todavía existe. La tarde no ha terminado. Las decisiones del pasado se quedan en el pasado. Lo que viene ahora puede ser diferente, si quieres que lo sea.'
         }
       },
       activity: {
@@ -399,9 +382,7 @@
           saveAndAdvance('E08');
         }
       },
-      pedagogical: 'Autoconciencia del líder como prerequisito de la conducta transformacional.',
-      hookLine: 'El momento más peligroso para un líder no es cuando el grupo se rebela. Es cuando el líder se pregunta si merece estar ahí.',
-      next: 'E08'
+      hookLine: 'El momento más peligroso para un líder no es cuando el grupo se rebela. Es cuando el líder se pregunta si merece estar ahí.'
     },
 
     /* ── E08 ── */
@@ -422,6 +403,7 @@
       activity: {
         type: 'quiz',
         prompt: '¿Qué factor predice mejor el rendimiento deportivo sostenido a largo plazo según la investigación en liderazgo?',
+        next: 'E09',
         options: [
           { id: 'Q_A', text: 'El estilo de liderazgo del entrenador (transformacional vs. transaccional)', correct: false },
           { id: 'Q_B', text: 'La percepción del deportista de que su bienestar personal importa al entrenador', correct: true },
@@ -429,19 +411,11 @@
           { id: 'Q_D', text: 'La cohesión del grupo medida en test sociométricos', correct: false }
         ],
         score: 25,
-        feedbackCorrect: 'Exacto. La investigación de Chelladurai y estudios posteriores (incluido el meta-análisis de Loughead & Hardy, 2005) muestra que la percepción del deportista de que su bienestar importa al entrenador —independientemente del estilo de liderazgo— es el predictor más robusto del rendimiento sostenido. No la táctica. No la cohesión. La percepción de que alguien te ve como persona.',
+        feedbackCorrect: 'Exacto. La investigación de Chelladurai y estudios posteriores muestra que la percepción del deportista de que su bienestar importa al entrenador —independientemente del estilo de liderazgo— es el predictor más robusto del rendimiento sostenido. No la táctica. No la cohesión. La percepción de que alguien te ve como persona.',
         feedbackIncorrect: 'No exactamente. El hallazgo más sorprendente es que no es el estilo de liderazgo lo que mejor predice el rendimiento sostenido, sino la percepción del deportista de que su bienestar personal importa al entrenador. Esto reencuadra toda la discusión sobre estilos: sin ese componente relacional, incluso el liderazgo "correcto" produce rendimiento frágil.',
-        badgeOnCorrect: 'B_EVIDENCE',
-        onSelect: function (optId, correct) {
-          if (correct) STATE.score += 25;
-          if (correct) unlockBadge('B_EVIDENCE');
-          STATE.decisions.push({ scene: 'E08', type: 'quiz', value: optId, correct: correct });
-          saveAndAdvance('E09');
-        }
+        badgeOnCorrect: 'B_EVIDENCE'
       },
-      pedagogical: 'Hallazgo contraintuitivo: la conducta de apoyo percibida supera al estilo de liderazgo como predictor de rendimiento.',
-      hookLine: 'No se trata del estilo. Nunca se trató del estilo.',
-      next: 'E09'
+      hookLine: 'No se trata del estilo. Nunca se trató del estilo.'
     },
 
     /* ── E09 ── */
@@ -463,36 +437,34 @@
       ],
       quote: '"El líder que reconoce el coste de sus decisiones es el líder que puede transformarse. Y un líder que se transforma transforma a los que tiene alrededor."',
       activity: {
-        type: 'dialogue',
+        type: 'decision',
         prompt: '¿Qué responde Jordi a Jack?',
         options: [
           {
             id: 'D3_A', label: 'Recibe la honestidad y la convierte en aprendizaje colectivo',
             text: '"Jack, lo que acabas de hacer tiene más valor pedagógico que todo lo que yo podría decir esta tarde. Gracias. En serio."',
             score: 25, badge: 'B_COURAGE', nextScene: 'E10', routeTag: 'A',
-            feedback: 'Jordi transforma un momento personal en un recurso colectivo. Esto es liderazgo transformacional en su versión más concreta: no el líder que tiene razón, sino el líder que crea condiciones para que otros crezcan.',
+            feedback: 'Jordi transforma un momento personal en un recurso colectivo. Esto es liderazgo transformacional: no el líder que tiene razón, sino el líder que crea condiciones para que otros crezcan.',
             feedbackConcept: 'Chelladurai: Conducta transformacional → eleva la madurez colectiva más allá del individuo.'
           },
           {
             id: 'D3_B', label: 'Lo valida pero deriva a lo teórico',
             text: '"Exactamente. El modelo predice esto: el coste del liderazgo directivo no aparece inmediatamente."',
             score: 0, badge: null, nextScene: 'E09b', routeTag: 'B',
-            feedback: 'Jordi utiliza el marco para protegerse de la emoción. El momento de Jack queda anclado en el modelo en lugar de en el grupo. Una oportunidad transformacional convertida en confirmación teórica.',
+            feedback: 'Jordi utiliza el marco para protegerse de la emoción. El momento de Jack queda anclado en el modelo en lugar de en el grupo.',
             feedbackConcept: 'Chelladurai: El líder que intelectualiza las emociones bloquea la madurez colectiva.'
           },
           {
             id: 'D3_C', label: 'Deja que el silencio trabaje',
             text: 'Jordi no dice nada. Asiente. Espera.',
             score: 15, badge: null, nextScene: 'E10', routeTag: 'A',
-            feedback: 'El silencio intencionado es una forma de conducta de apoyo. No cierra la emoción. Pero tampoco la convierte en recurso colectivo. Es la opción más segura y la menos transformadora.',
+            feedback: 'El silencio intencionado es una forma de conducta de apoyo. No cierra la emoción. Pero tampoco la convierte en recurso colectivo.',
             feedbackConcept: 'Chelladurai: La conducta de apoyo pasiva protege; la activa transforma.'
           }
         ]
       },
-      pedagogical: 'Momento de verdad del veterano. Transformación real vs. gestión retórica del cambio.',
       hookLine: 'El veterano que admite su coste no se rinde. Se convierte en el mejor argumento del seminario.',
-      temperatureChange: { D3_A: 1, D3_B: 0, D3_C: 0 },
-      next: { D3_A: 'E10', D3_B: 'E09b', D3_C: 'E10' }
+      temperatureChange: { D3_A: 1, D3_B: 0, D3_C: 0 }
     },
 
     /* ── E09b ── */
@@ -513,12 +485,10 @@
       activity: {
         type: 'info',
         prompt: 'El orden puede ser la forma más elegante de evitar la transformación. Continúa al epílogo.',
-        buttonLabel: 'Ver el epílogo',
-        onSelect: function () { saveAndAdvance('E10'); }
+        buttonLabel: 'Ver el epílogo →',
+        next: 'E10'
       },
-      pedagogical: 'La intelectualización como defensa contra la transformación.',
-      hookLine: 'Las mejores conclusiones a veces son el mejor escondite.',
-      next: 'E10'
+      hookLine: 'Las mejores conclusiones a veces son el mejor escondite.'
     },
 
     /* ── E09c ── */
@@ -541,12 +511,10 @@
       activity: {
         type: 'info',
         prompt: 'Jordi acaba de repetir el error que lleva todo el día enseñando a evitar. Continúa.',
-        buttonLabel: 'Ver el epílogo',
-        onSelect: function () { saveAndAdvance('E10'); }
+        buttonLabel: 'Ver el epílogo →',
+        next: 'E10'
       },
-      pedagogical: 'El líder que enseña y no practica. Incoherencia entre conducta real y requerida.',
-      hookLine: 'La coherencia no se declama. Se practica en el momento que menos la esperas.',
-      next: 'E10'
+      hookLine: 'La coherencia no se declama. Se practica en el momento que menos la esperas.'
     },
 
     /* ── E10 ── */
@@ -590,55 +558,64 @@
           showFinalEpilogue();
         }
       },
-      pedagogical: 'Consolidación del aprendizaje. Legado como medida del liderazgo transformacional.',
-      hookLine: 'No viniste a enseñar. Viniste a que algo cambiara. Y algo ha cambiado.',
-      next: null
+      hookLine: 'No viniste a enseñar. Viniste a que algo cambiara. Y algo ha cambiado.'
     }
   };
 
-  /* ════════════════════════════════════════════════
-     EPÍLOGOS ADAPTATIVOS
-  ════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════
+     EPÍLOGOS
+  ══════════════════════════════════════════════════════ */
   var EPILOGUES = {
     A: {
-      title: 'El Líder que Conecta',
-      scoreRange: '90-100 pts',
+      title: 'El Líder que Conecta', scoreRange: '90-100 pts',
       concept: 'Liderazgo Transformacional Sostenible',
       text: 'Jordi sale de la sala con la certeza tranquila de quien no ha ganado un debate sino facilitado un proceso. El grupo no se ha transformado en un día. Pero algo se ha movido. Jack ha contado sus tres jugadores perdidos. Elena ha sido vista. Gery ha hablado. Estos no son resultados de un modelo: son consecuencias de un líder que eligió ser coherente bajo presión. El liderazgo transformacional no es un estilo que se adopta. Es una práctica que se sostiene, especialmente cuando el grupo resiste. Lo que Jordi ha hecho hoy no es enseñar el Modelo Multidimensional de Chelladurai. Ha demostrado que la congruencia entre lo que exige el contexto, lo que necesita el grupo y lo que uno realmente hace es posible. Incluso cuando duele. Especialmente cuando duele.',
       action: 'Revisa tu última intervención como líder. ¿Hubo un momento en que cediste para no perder el control? ¿Qué habrías dicho si hubieras tenido diez segundos más?',
       endQuestion: '¿Cuándo fue la última vez que elegiste la incomodidad porque era lo correcto?'
     },
     B: {
-      title: 'La Semilla Plantada',
-      scoreRange: '70-89 pts',
+      title: 'La Semilla Plantada', scoreRange: '70-89 pts',
       concept: 'Liderazgo en Proceso de Maduración',
       text: 'No todo ha salido como esperabas. Hay decisiones que habrías tomado diferente. Y eso no es un fracaso: es información. Jordi sale de la sala con algo agridulce en el pecho: la sensación de que estuvo cerca de algo más grande y no del todo llegó. Pero cerca cuenta. La semilla que Gery plantó cuando habló, la grieta que se abrió en el silencio de Jack, el momento en que Elena fue —aunque fuera por un instante— visible: todo eso ocurrió. No fue el seminario que Jordi había planeado. Fue mejor que algunos y peor que otros. El liderazgo no siempre tiene aplausos. A veces tiene el ruido sordo de algo que acaba de empezar a crecer.',
       action: 'Identifica la decisión de hoy que más incertidumbre te generó. ¿Qué habrías necesitado saber para tomarla con más claridad?',
       endQuestion: '¿Qué semilla plantaste hoy que no sabrás si germinó hasta dentro de un año?'
     },
     C: {
-      title: 'La Lección del Fracaso',
-      scoreRange: '50-69 pts',
+      title: 'La Lección del Fracaso', scoreRange: '50-69 pts',
       concept: 'Aprendizaje a través de la Fricción',
       text: 'El seminario ha sido un desastre controlado. Jordi lo sabe. El grupo también. Pero hay algo inesperado en el aire cuando la sala se vacía: nadie se ha ido indiferente. El conflicto que no se resolvió, la tensión que no se transformó, la evidencia que no convenció a quien tenía que convencer: todo eso ha dejado rastro. A veces el mayor servicio que puede hacer un líder es ser el espejo que le muestra al grupo lo que aún no quiere verse. Jordi ha fallado en ser el líder que quería ser hoy. Pero al fallar con integridad —sin trampa, sin atajos fáciles— ha enseñado algo que ningún PowerPoint podría: que el liderazgo real incluye el fracaso, y que el fracaso real incluye la posibilidad de empezar de nuevo.',
       action: 'Lee de nuevo el Modelo Multidimensional de Chelladurai. Esta vez, aplícalo a tu propio equipo real. ¿Dónde está la mayor brecha entre conducta real y preferida?',
       endQuestion: '¿Cuándo fue la última vez que un fracaso tuyo le enseñó algo útil a alguien?'
     },
     D: {
-      title: 'El Espejo Roto',
-      scoreRange: '0-49 pts',
+      title: 'El Espejo Roto', scoreRange: '0-49 pts',
       concept: 'Incoherencia entre Teoría y Práctica',
-      text: 'Jordi se queda solo en la sala. El portátil cerrado. El cuaderno en blanco.',
-      textFull: 'Jordi se queda solo en la sala. El portátil cerrado. El cuaderno en blanco. Hoy ha enseñado todo lo que sabe y no ha practicado nada de lo que enseña. Ha predicado la congruencia y ha sido incongruente. Ha hablado de conducta de apoyo y ha ignorado a Elena. Ha defendido el liderazgo transformacional y ha reaccionado con defensiva cuando le cuestionaron. No hay moraleja fácil aquí. Solo un espejo. Y un cuaderno en blanco que espera. El espejo roto no significa que el liderazgo que describes sea falso. Significa que todavía hay distancia entre quien eres y quien quieres ser. Esa distancia no es una condena. Es el espacio donde ocurre el trabajo real.',
+      text: 'Jordi se queda solo en la sala. El portátil cerrado. El cuaderno en blanco. Hoy ha enseñado todo lo que sabe y no ha practicado nada de lo que enseña. Ha predicado la congruencia y ha sido incongruente. Ha hablado de conducta de apoyo y ha ignorado a Elena. Ha defendido el liderazgo transformacional y ha reaccionado con defensiva cuando le cuestionaron. No hay moraleja fácil aquí. Solo un espejo. Y un cuaderno en blanco que espera. El espejo roto no significa que el liderazgo que describes sea falso. Significa que todavía hay distancia entre quien eres y quien quieres ser. Esa distancia no es una condena. Es el espacio donde ocurre el trabajo real.',
       action: 'Vuelve al inicio. Empieza por E01. Esta vez, nota el momento en que el miedo al conflicto empieza a tomar decisiones por ti.',
       endQuestion: '¿Qué está en blanco en tu cuaderno que llevas tiempo sin atreverte a escribir?'
     }
   };
 
-  /* ════════════════════════════════════════════════
-     UTILIDADES DE ESTADO
-  ════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════
+     UTILIDADES DOM
+  ══════════════════════════════════════════════════════ */
+  function el(id) { return document.getElementById(id); }
+  function make(tag, cls) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    return e;
+  }
+  function emotionIconLabel(icon) {
+    var map = {
+      tension: '⚡ Tensión', apertura: '◎ Apertura', resistencia: '◈ Resistencia',
+      quiebre: '◆ Quiebre', reconexion: '◉ Reconexión', transformacion: '✦ Transformación'
+    };
+    return map[icon] || icon;
+  }
 
+  /* ══════════════════════════════════════════════════════
+     UTILIDADES DE ESTADO
+  ══════════════════════════════════════════════════════ */
   function unlockBadge(badgeId) {
     if (STATE.badgesUnlocked.indexOf(badgeId) === -1) {
       STATE.badgesUnlocked.push(badgeId);
@@ -647,12 +624,6 @@
   }
 
   function updateLeadershipProfile() {
-    var transformational = 0;
-    STATE.decisions.forEach(function (d) {
-      if (d.type === 'decision' || d.type === 'dialogue') {
-        if (d.value && (d.value.endsWith('_A') || d.value.endsWith('_C'))) transformational++;
-      }
-    });
     if (STATE.score >= 90) STATE.leadershipProfile = 'transformacional';
     else if (STATE.score >= 70) STATE.leadershipProfile = 'situacional';
     else if (STATE.score >= 50) STATE.leadershipProfile = 'correctivo';
@@ -667,45 +638,48 @@
   }
 
   function saveAndAdvance(nextSceneId) {
-    if (nextSceneId) STATE.currentScene = nextSceneId;
+    STATE.currentScene = nextSceneId;
     SCORM.saveState(STATE);
     renderScene(nextSceneId);
   }
 
-  /* ════════════════════════════════════════════════
-     RENDERIZADO — HUD
-  ════════════════════════════════════════════════ */
-
+  /* ══════════════════════════════════════════════════════
+     HUD
+  ══════════════════════════════════════════════════════ */
   function updateHUD() {
     var scene = SCENES[STATE.currentScene];
-    var canonIdx = scene && scene.canonical ? scene.canonicalIndex : STATE.canonicalProgress;
-
-    el('hud-progress-text').textContent = canonIdx + ' / ' + CANONICAL_SCENE_COUNT;
-    el('hud-score').textContent = STATE.score + ' pts';
-
-    var pct = (canonIdx / CANONICAL_SCENE_COUNT) * 100;
-    el('hud-progress-bar').style.width = pct + '%';
-
+    var idx = (scene && scene.canonical) ? scene.canonicalIndex : STATE.canonicalProgress;
+    var hudPT = el('hud-progress-text');
+    var hudS  = el('hud-score');
+    var hudPB = el('hud-progress-bar');
+    if (hudPT) hudPT.textContent = idx + ' / ' + CANONICAL_SCENE_COUNT;
+    if (hudS)  hudS.textContent  = STATE.score + ' pts';
+    if (hudPB) hudPB.style.width = ((idx / CANONICAL_SCENE_COUNT) * 100) + '%';
     updateTemperatureBar();
     updateMinimap();
     updateDecisionTracker();
   }
 
   function updateTemperatureBar() {
-    var t = Math.max(1, Math.min(5, STATE.groupTemperature)) - 1;
-    el('temp-icon').textContent = TEMP_ICONS[t];
-    el('temp-label').textContent = TEMP_LABELS[t];
-    el('temp-fill').style.height = ((t + 1) * 20) + '%';
-    el('temp-fill').style.backgroundColor = TEMP_COLORS[t];
+    var t = Math.max(0, Math.min(4, STATE.groupTemperature - 1));
+    var icon  = el('temp-icon');
+    var label = el('temp-label');
+    var fill  = el('temp-fill');
+    if (icon)  icon.textContent = TEMP_ICONS[t];
+    if (label) label.textContent = TEMP_LABELS[t];
+    if (fill) {
+      fill.style.height = ((t + 1) * 20) + '%';
+      fill.style.backgroundColor = TEMP_COLORS[t];
+    }
   }
 
   function updateMinimap() {
     var mm = el('minimap');
     if (!mm) return;
-    var nodes = mm.querySelectorAll('[data-scene]');
-    nodes.forEach(function (n) {
+    mm.querySelectorAll('[data-scene]').forEach(function (n) {
       var sid = n.getAttribute('data-scene');
-      n.className = 'mm-node';
+      n.className = 'mm-node' + (BRANCH_SCENES.indexOf(sid) >= 0 ? ' mm-branch' : '');
+      if (n.textContent.indexOf('★') >= 0) n.classList.add('mm-star');
       if (sid === STATE.currentScene) n.classList.add('mm-current');
       else if (STATE.decisions.some(function (d) { return d.scene === sid; })) n.classList.add('mm-visited');
     });
@@ -719,62 +693,130 @@
     }).slice(-3);
     tracker.innerHTML = '';
     relevant.forEach(function (d) {
-      var span = document.createElement('span');
-      span.className = 'dt-icon';
+      var span = make('span', 'dt-icon');
       if (d.type === 'quiz') {
         span.textContent = d.correct ? '✓' : '✗';
         span.title = d.correct ? 'Quiz correcto' : 'Quiz incorrecto';
       } else {
-        var val = d.value || '';
-        if (val.endsWith('_A')) { span.textContent = 'T'; span.title = 'Transformacional'; }
-        else if (val.endsWith('_C')) { span.textContent = 'S'; span.title = 'Situacional'; }
+        var v = d.value || '';
+        if (v.slice(-2) === '_A') { span.textContent = 'T'; span.title = 'Transformacional'; }
+        else if (v.slice(-2) === '_C') { span.textContent = 'S'; span.title = 'Situacional'; }
         else { span.textContent = 'R'; span.title = 'Reactivo/Evasivo'; }
       }
       tracker.appendChild(span);
     });
   }
 
-  /* ════════════════════════════════════════════════
-     RENDERIZADO — ESCENAS
-  ════════════════════════════════════════════════ */
-
+  /* ══════════════════════════════════════════════════════
+     RENDERIZADO — TRANSICIÓN (FIX: opacity inline, sin CSS classes)
+  ══════════════════════════════════════════════════════ */
   function renderScene(sceneId) {
     var scene = SCENES[sceneId];
-    if (!scene) { console.error('Scene not found:', sceneId); return; }
+    if (!scene) { return; }
 
-    if (scene.canonical) {
-      STATE.canonicalProgress = scene.canonicalIndex;
-    }
+    STATE.currentScene = sceneId;
+    if (scene.canonical) STATE.canonicalProgress = scene.canonicalIndex;
 
-    /* Scene transition animation */
     var container = el('scene-container');
-    container.classList.add('scene-exit');
+
+    /* Fade-out rápido usando estilo inline — evita el bug de forwards-fill */
+    container.style.transition = 'opacity 0.18s ease';
+    container.style.opacity = '0';
+    container.style.transform = 'translateY(6px)';
+
     setTimeout(function () {
-      container.classList.remove('scene-exit');
-      container.classList.add('scene-enter');
+      /* Reconstruir contenido */
+      container.innerHTML = '';
+      container.removeAttribute('style');
+      if (scene.specialFX) container.classList.add('scene-cold');
+      else container.classList.remove('scene-cold');
+
       buildSceneDOM(scene, container);
       updateHUD();
-      setTimeout(function () {
-        container.classList.remove('scene-enter');
-      }, 400);
-    }, 300);
+
+      /* Aplicar temporizador antiavance 30s */
+      var lockSecs = BRANCH_SCENES.indexOf(sceneId) >= 0 ? 15 : READING_SECONDS;
+      applyReadingLock(container, lockSecs, scene);
+
+      /* Fade-in con requestAnimationFrame doble para garantizar repaint */
+      container.style.opacity = '0';
+      container.style.transform = 'translateY(10px)';
+      container.style.transition = 'none';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          container.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+          container.style.opacity = '1';
+          container.style.transform = 'translateY(0)';
+        });
+      });
+    }, 200);
   }
 
+  /* ══════════════════════════════════════════════════════
+     TEMPORIZADOR ANTIAVANCE — 30 segundos
+  ══════════════════════════════════════════════════════ */
+  function applyReadingLock(container, seconds, scene) {
+    /* Recopilar todos los botones interactivos en actividades */
+    var actBtns = Array.prototype.slice.call(
+      container.querySelectorAll('.activity-wrapper button, .activity-wrapper input')
+    );
+    if (actBtns.length === 0) return;
+
+    /* Deshabilitar todos */
+    actBtns.forEach(function (b) { b.disabled = true; b.classList.add('btn-locked'); });
+
+    /* Insertar barra de temporizador antes de la primera actividad */
+    var firstAct = container.querySelector('.activity-wrapper');
+    var timerEl = make('div', 'reading-timer');
+    var trackEl = make('div', 'rt-track');
+    var fillEl  = make('div', 'rt-fill');
+    var labelEl = make('div', 'rt-label');
+    labelEl.innerHTML = '<span class="rt-icon">⏱</span> Lee el texto antes de responder &mdash; <strong class="rt-count">' + seconds + 's</strong>';
+    trackEl.appendChild(fillEl);
+    timerEl.appendChild(trackEl);
+    timerEl.appendChild(labelEl);
+    firstAct.insertBefore(timerEl, firstAct.firstChild);
+
+    var remaining = seconds;
+    var countEl = timerEl.querySelector('.rt-count');
+
+    var interval = setInterval(function () {
+      remaining--;
+      fillEl.style.width = (((seconds - remaining) / seconds) * 100) + '%';
+      if (countEl) countEl.textContent = Math.max(0, remaining) + 's';
+
+      if (remaining <= 0) {
+        clearInterval(interval);
+        labelEl.innerHTML = '<span class="rt-icon" style="color:#27AE60">✓</span> <strong>Puedes responder ahora</strong>';
+        timerEl.classList.add('rt-done');
+        setTimeout(function () {
+          timerEl.style.transition = 'opacity 0.4s ease';
+          timerEl.style.opacity = '0';
+          setTimeout(function () { timerEl.remove(); }, 400);
+          /* Habilitar botones */
+          actBtns.forEach(function (b) {
+            b.disabled = false;
+            b.classList.remove('btn-locked');
+          });
+          /* E03: arrancar countdown narrativo DESPUÉS del lock */
+          if (scene && scene.specialFX) {
+            var cdBar = container.querySelector('.countdown-bar');
+            if (cdBar && cdBar._startFn) cdBar._startFn();
+          }
+        }, 600);
+      }
+    }, 1000);
+  }
+
+  /* ══════════════════════════════════════════════════════
+     CONSTRUCCIÓN DE ESCENA
+  ══════════════════════════════════════════════════════ */
   function buildSceneDOM(scene, container) {
-    container.innerHTML = '';
-
-    /* Special FX for E03 */
-    if (scene.specialFX) {
-      container.classList.add('scene-cold');
-    } else {
-      container.classList.remove('scene-cold');
-    }
-
-    /* Header */
+    /* Cabecera */
     var header = make('div', 'scene-header');
-    var emotionTag = make('span', 'emotion-tag emotion-' + scene.emotionIcon);
-    emotionTag.textContent = emotionIconLabel(scene.emotionIcon);
-    header.appendChild(emotionTag);
+    var etag = make('span', 'emotion-tag emotion-' + scene.emotionIcon);
+    etag.textContent = emotionIconLabel(scene.emotionIcon);
+    header.appendChild(etag);
     var titleEl = make('h1', 'scene-title');
     titleEl.textContent = scene.title;
     header.appendChild(titleEl);
@@ -783,7 +825,7 @@
     header.appendChild(actEl);
     container.appendChild(header);
 
-    /* Narrative */
+    /* Narrativa */
     if (scene.narrative && scene.narrative.length) {
       var narDiv = make('div', 'narrative');
       scene.narrative.forEach(function (line) {
@@ -794,12 +836,12 @@
       container.appendChild(narDiv);
     }
 
-    /* Pedagogical block (E02) */
+    /* Bloque pedagógico (E02) */
     if (scene.pedagogicalBlock) {
       var pb = make('div', 'pedagogical-block');
-      var pbTitle = make('h3', 'pb-title');
-      pbTitle.textContent = scene.pedagogicalBlock.title;
-      pb.appendChild(pbTitle);
+      var pbT = make('h3', 'pb-title');
+      pbT.textContent = scene.pedagogicalBlock.title;
+      pb.appendChild(pbT);
       var ol = document.createElement('ol');
       scene.pedagogicalBlock.items.forEach(function (item) {
         var li = document.createElement('li');
@@ -810,31 +852,26 @@
       container.appendChild(pb);
     }
 
-    /* Quote */
+    /* Cita */
     if (scene.quote) {
-      var quoteEl = make('blockquote', 'scene-quote');
-      quoteEl.innerHTML = scene.quote;
-      container.appendChild(quoteEl);
+      var q = make('blockquote', 'scene-quote');
+      q.innerHTML = scene.quote;
+      container.appendChild(q);
     }
 
-    /* Convergence / Alternative Path */
+    /* Resumen de camino alternativo (convergencias) */
     if (scene.isConvergence && scene.alternativePath) {
-      container.appendChild(buildAlternativePathCard(scene));
+      container.appendChild(buildAltPathCard(scene));
     }
 
-    /* Activity */
-    var activityData = scene.activity || scene.decisionActivity;
-    if (activityData) {
-      if (scene.activity && scene.decisionActivity) {
-        /* E06 has two activities */
-        container.appendChild(buildActivity(scene.activity, scene));
-        container.appendChild(buildActivity(scene.decisionActivity, scene));
-      } else {
-        container.appendChild(buildActivity(activityData, scene));
-      }
+    /* Actividad principal
+       E06 es especial: solo mostramos la actividad de subtexto;
+       la decisionActivity se inyecta después del confirm. */
+    if (scene.activity) {
+      container.appendChild(buildActivity(scene.activity, scene));
     }
 
-    /* Hook line */
+    /* Frase de gancho */
     if (scene.hookLine) {
       var hook = make('div', 'hook-line');
       hook.textContent = scene.hookLine;
@@ -842,11 +879,15 @@
     }
   }
 
-  function buildAlternativePathCard(scene) {
+  /* ══════════════════════════════════════════════════════
+     CAMINO ALTERNATIVO
+  ══════════════════════════════════════════════════════ */
+  function buildAltPathCard(scene) {
     var card = make('div', 'alt-path-card');
-    var toggleBtn = make('button', 'alt-path-toggle');
-    toggleBtn.textContent = '🗺  Ver el otro camino';
-    var content = make('div', 'alt-path-content hidden');
+    var btn = make('button', 'alt-path-toggle');
+    btn.textContent = '🗺  Ver el otro camino';
+    var content = make('div', 'alt-path-content');
+    content.style.display = 'none';
 
     var pathData;
     if (scene.id === 'E07') {
@@ -856,67 +897,67 @@
     }
 
     if (pathData && pathData.text) {
-      var ptitle = make('h4', 'alt-path-title');
-      ptitle.textContent = pathData.title || 'Otro camino';
-      content.appendChild(ptitle);
-      var ptext = make('p', '');
-      ptext.textContent = pathData.text;
-      content.appendChild(ptext);
+      var pt = make('h4', 'alt-path-title');
+      pt.textContent = pathData.title || 'Otro camino';
+      content.appendChild(pt);
+      var pp = make('p', '');
+      pp.textContent = pathData.text;
+      content.appendChild(pp);
     }
 
-    toggleBtn.addEventListener('click', function () {
-      content.classList.toggle('hidden');
-      if (!content.classList.contains('hidden')) {
+    btn.addEventListener('click', function () {
+      var hidden = content.style.display === 'none';
+      content.style.display = hidden ? 'block' : 'none';
+      btn.textContent = hidden ? '🗺  Cerrar' : '🗺  Ver el otro camino';
+      if (hidden && !STATE.alternativePathViewed) {
         STATE.alternativePathViewed = true;
         STATE.score += 3;
-        el('hud-score').textContent = STATE.score + ' pts';
-        toggleBtn.textContent = '🗺  Cerrar';
+        var hs = el('hud-score');
+        if (hs) hs.textContent = STATE.score + ' pts';
         SCORM.saveState(STATE);
-      } else {
-        toggleBtn.textContent = '🗺  Ver el otro camino';
       }
     });
 
-    card.appendChild(toggleBtn);
+    card.appendChild(btn);
     card.appendChild(content);
     return card;
   }
 
+  /* ══════════════════════════════════════════════════════
+     DISPATCHER DE ACTIVIDADES
+  ══════════════════════════════════════════════════════ */
   function buildActivity(act, scene) {
     var wrapper = make('div', 'activity-wrapper');
-
-    var promptEl = make('p', 'activity-prompt');
-    promptEl.textContent = act.prompt;
-    wrapper.appendChild(promptEl);
+    var prompt = make('p', 'activity-prompt');
+    prompt.textContent = act.prompt;
+    wrapper.appendChild(prompt);
 
     switch (act.type) {
-      case 'thermometer': wrapper.appendChild(buildThermometer(act, scene)); break;
-      case 'decision': wrapper.appendChild(buildDecision(act, scene)); break;
-      case 'quiz': wrapper.appendChild(buildQuiz(act, scene)); break;
-      case 'dragdrop': wrapper.appendChild(buildDragDrop(act, scene)); break;
+      case 'thermometer':     wrapper.appendChild(buildThermometer(act)); break;
+      case 'decision':        wrapper.appendChild(buildDecision(act, scene)); break;
+      case 'dialogue':        wrapper.appendChild(buildDecision(act, scene)); break;
+      case 'quiz':            wrapper.appendChild(buildQuiz(act, scene)); break;
+      case 'dragdrop':        wrapper.appendChild(buildDragDrop(act, scene)); break;
       case 'subtextIdentify': wrapper.appendChild(buildSubtext(act, scene)); break;
-      case 'dialogue': wrapper.appendChild(buildDecision(act, scene)); break;
-      case 'wordAnchor': wrapper.appendChild(buildWordAnchor(act, scene)); break;
-      case 'info': wrapper.appendChild(buildInfo(act, scene)); break;
+      case 'wordAnchor':      wrapper.appendChild(buildWordAnchor(act)); break;
+      case 'info':            wrapper.appendChild(buildInfo(act, scene)); break;
     }
-
     return wrapper;
   }
 
-  /* ── Activity builders ── */
-
+  /* ── Termómetro ── */
   function buildThermometer(act) {
     var div = make('div', 'thermometer-activity');
     for (var i = 1; i <= act.scale; i++) {
       (function (val) {
         var btn = make('button', 'thermo-btn');
-        btn.setAttribute('data-val', val);
-        btn.innerHTML = '<span class="thermo-num">' + val + '</span><span class="thermo-label">' + act.labels[val - 1] + '</span>';
+        btn.innerHTML = '<span class="thermo-num">' + val + '</span>' +
+                        '<span class="thermo-label">' + act.labels[val - 1] + '</span>';
         btn.addEventListener('click', function () {
-          var allBtns = div.querySelectorAll('.thermo-btn');
-          allBtns.forEach(function (b) { b.classList.remove('selected'); });
+          div.querySelectorAll('.thermo-btn').forEach(function (b) { b.classList.remove('selected'); });
           btn.classList.add('selected');
-          setTimeout(function () { act.onSelect(val); }, 400);
+          div.querySelectorAll('.thermo-btn').forEach(function (b) { b.disabled = true; });
+          setTimeout(function () { act.onSelect(val); }, 350);
         });
         div.appendChild(btn);
       }(i));
@@ -924,68 +965,76 @@
     return div;
   }
 
+  /* ── Decisión / Diálogo ── */
   function buildDecision(act, scene) {
     var div = make('div', 'decision-activity');
 
-    /* Countdown for E03 */
-    var countdown = null;
-    var countdownInterval = null;
-    if (scene.specialFX && act.countdown) {
-      countdown = make('div', 'countdown-bar');
-      var fill = make('div', 'countdown-fill');
-      countdown.appendChild(fill);
+    /* Countdown E03: se construye pero NO arranca hasta que el lock lo active */
+    var cdBar = null;
+    if (scene && scene.specialFX && act.countdown) {
+      cdBar = make('div', 'countdown-bar');
+      var cdFill = make('div', 'countdown-fill');
+      cdFill.style.width = '100%';
+      cdBar.appendChild(cdFill);
       var cdLabel = make('span', 'countdown-label');
-      cdLabel.textContent = 'Jordi tiene ' + act.countdown + ' segundos.';
-      countdown.appendChild(cdLabel);
-      div.appendChild(countdown);
-      var remaining = act.countdown;
-      countdownInterval = setInterval(function () {
-        remaining--;
-        fill.style.width = (remaining / act.countdown * 100) + '%';
-        cdLabel.textContent = 'Jordi tiene ' + remaining + ' segundo' + (remaining !== 1 ? 's' : '') + '.';
-        if (remaining <= 0) clearInterval(countdownInterval);
-      }, 1000);
+      cdLabel.textContent = 'Jordi tiene ' + act.countdown + ' segundos para decidir.';
+      cdBar.appendChild(cdLabel);
+      div.appendChild(cdBar);
+
+      var cdTotal = act.countdown;
+      var cdInterval = null;
+      cdBar._startFn = function () {
+        var rem = cdTotal;
+        cdInterval = setInterval(function () {
+          rem--;
+          cdFill.style.width = ((rem / cdTotal) * 100) + '%';
+          cdLabel.textContent = 'Jordi tiene ' + rem + ' segundo' + (rem !== 1 ? 's' : '') + '.';
+          if (rem <= 0) clearInterval(cdInterval);
+        }, 1000);
+      };
     }
 
     act.options.forEach(function (opt) {
       var btn = make('button', 'decision-btn');
       btn.textContent = opt.label;
       btn.addEventListener('click', function () {
-        if (countdownInterval) clearInterval(countdownInterval);
-        btn.classList.add('selected');
-        div.querySelectorAll('.decision-btn').forEach(function (b) { b.disabled = true; });
+        if (cdInterval) clearInterval(cdInterval);
 
-        /* Record decision */
+        /* Bloquear todos los botones de decisión */
+        div.querySelectorAll('.decision-btn').forEach(function (b) { b.disabled = true; });
+        btn.classList.add('selected');
+
+        /* Registrar decisión */
         STATE.decisions.push({ scene: scene.id, type: act.type, value: opt.id });
         if (opt.score) STATE.score += opt.score;
         if (opt.badge) unlockBadge(opt.badge);
         if (opt.routeTag) STATE.routeTaken = opt.routeTag;
 
-        /* Temperature */
+        /* Temperatura */
         if (scene.temperatureChange && scene.temperatureChange[opt.id] !== undefined) {
-          STATE.groupTemperature = Math.max(1, Math.min(5, STATE.groupTemperature + scene.temperatureChange[opt.id]));
+          STATE.groupTemperature = Math.max(1, Math.min(5,
+            STATE.groupTemperature + scene.temperatureChange[opt.id]));
         }
-
         updateHUD();
+
+        /* Texto seleccionado */
+        var selText = make('p', 'option-text-display');
+        selText.innerHTML = '<em>"' + opt.text + '"</em>';
+        div.appendChild(selText);
 
         /* Feedback */
         var fb = make('div', 'feedback-block');
-        var fbText = make('p', 'feedback-text');
-        fbText.textContent = opt.feedback;
-        fb.appendChild(fbText);
+        var fbt = make('p', 'feedback-text');
+        fbt.textContent = opt.feedback;
+        fb.appendChild(fbt);
         if (opt.feedbackConcept) {
-          var fc = make('p', 'feedback-concept');
-          fc.textContent = opt.feedbackConcept;
-          fb.appendChild(fc);
+          var fbc = make('p', 'feedback-concept');
+          fbc.textContent = opt.feedbackConcept;
+          fb.appendChild(fbc);
         }
         div.appendChild(fb);
 
-        /* Quote display */
-        var quoteText = make('p', 'option-text-display');
-        quoteText.innerHTML = '<em>"' + opt.text + '"</em>';
-        div.insertBefore(quoteText, fb);
-
-        /* Next btn */
+        /* Botón continuar */
         var nextBtn = make('button', 'btn-next');
         nextBtn.textContent = 'Continuar →';
         nextBtn.addEventListener('click', function () {
@@ -998,95 +1047,93 @@
     return div;
   }
 
-  function buildQuiz(act) {
+  /* ── Quiz ── */
+  function buildQuiz(act, scene) {
     var div = make('div', 'quiz-activity');
     var answered = false;
+
     act.options.forEach(function (opt) {
       var btn = make('button', 'quiz-btn');
       btn.textContent = opt.text;
+      btn.setAttribute('data-id', opt.id);
       btn.addEventListener('click', function () {
         if (answered) return;
         answered = true;
         div.querySelectorAll('.quiz-btn').forEach(function (b) { b.disabled = true; });
-        btn.classList.add(opt.correct ? 'correct' : 'incorrect');
-        if (opt.correct) btn.classList.add('correct'); else btn.classList.add('incorrect');
 
-        /* Mark correct */
+        btn.classList.add(opt.correct ? 'correct' : 'incorrect');
         if (!opt.correct) {
           div.querySelectorAll('.quiz-btn').forEach(function (b) {
-            var oid = b.getAttribute('data-opt');
-            if (act.options.find(function (o) { return o.id === oid && o.correct; })) {
+            var oid = b.getAttribute('data-id');
+            if (act.options.some(function (o) { return o.id === oid && o.correct; })) {
               b.classList.add('correct-reveal');
             }
           });
         }
 
-        var fb = make('div', 'feedback-block');
-        fb.innerHTML = '<p>' + (opt.correct ? act.feedbackCorrect : act.feedbackIncorrect) + '</p>';
-        div.appendChild(fb);
+        if (opt.correct) {
+          STATE.score += act.score;
+          if (act.badgeOnCorrect) unlockBadge(act.badgeOnCorrect);
+        }
+        STATE.decisions.push({ scene: scene.id, type: 'quiz', value: opt.id, correct: opt.correct });
+        updateHUD();
 
-        act.onSelect(opt.id, opt.correct);
+        var fb = make('div', 'feedback-block');
+        var fbt = make('p', 'feedback-text');
+        fbt.textContent = opt.correct ? act.feedbackCorrect : act.feedbackIncorrect;
+        fb.appendChild(fbt);
+        div.appendChild(fb);
 
         var nextBtn = make('button', 'btn-next');
         nextBtn.textContent = 'Continuar →';
-        nextBtn.addEventListener('click', function () { saveAndAdvance('E09'); });
+        nextBtn.addEventListener('click', function () {
+          saveAndAdvance(act.next);  /* FIX: usa act.next, no hardcodeado */
+        });
         div.appendChild(nextBtn);
       });
-      btn.setAttribute('data-opt', opt.id);
       div.appendChild(btn);
     });
     return div;
   }
 
-  function buildDragDrop(act) {
+  /* ── Drag & Drop ── */
+  function buildDragDrop(act, scene) {
     var div = make('div', 'dragdrop-activity');
     var listEl = make('ul', 'dd-list');
-
     var currentOrder = act.items.slice();
-    /* Simple click-to-reorder fallback (mobile-friendly) */
     var selectedIdx = null;
 
     function renderItems() {
       listEl.innerHTML = '';
       currentOrder.forEach(function (item, idx) {
-        var li = make('li', 'dd-item');
-        li.setAttribute('data-id', item.id);
-        li.textContent = (idx + 1) + '. ' + item.text;
+        var li = make('li', 'dd-item' + (selectedIdx === idx ? ' dd-selected' : ''));
         li.setAttribute('draggable', 'true');
-
-        if (selectedIdx === idx) li.classList.add('dd-selected');
+        li.innerHTML = '<span class="dd-num">' + (idx + 1) + '.</span> ' + item.text;
 
         li.addEventListener('click', function () {
           if (selectedIdx === null) {
-            selectedIdx = idx;
-            renderItems();
+            selectedIdx = idx; renderItems();
           } else if (selectedIdx === idx) {
-            selectedIdx = null;
-            renderItems();
+            selectedIdx = null; renderItems();
           } else {
             var tmp = currentOrder[selectedIdx];
             currentOrder[selectedIdx] = currentOrder[idx];
             currentOrder[idx] = tmp;
-            selectedIdx = null;
-            renderItems();
+            selectedIdx = null; renderItems();
           }
         });
-
-        /* Drag events */
         li.addEventListener('dragstart', function () { selectedIdx = idx; li.classList.add('dragging'); });
-        li.addEventListener('dragend', function () { li.classList.remove('dragging'); });
-        li.addEventListener('dragover', function (e) { e.preventDefault(); });
-        li.addEventListener('drop', function (e) {
+        li.addEventListener('dragend',   function () { li.classList.remove('dragging'); });
+        li.addEventListener('dragover',  function (e) { e.preventDefault(); });
+        li.addEventListener('drop',      function (e) {
           e.preventDefault();
           if (selectedIdx !== null && selectedIdx !== idx) {
             var tmp = currentOrder[selectedIdx];
             currentOrder[selectedIdx] = currentOrder[idx];
             currentOrder[idx] = tmp;
-            selectedIdx = null;
-            renderItems();
+            selectedIdx = null; renderItems();
           }
         });
-
         listEl.appendChild(li);
       });
     }
@@ -1100,66 +1147,90 @@
     var confirmBtn = make('button', 'btn-confirm');
     confirmBtn.textContent = 'Confirmar orden';
     confirmBtn.addEventListener('click', function () {
-      var orderIds = currentOrder.map(function (i) { return i.id; });
-      var fb = make('div', 'feedback-block');
-      fb.innerHTML = '<p>' + act.feedback + '</p>';
-      div.appendChild(fb);
       confirmBtn.disabled = true;
-      act.onComplete(orderIds);
+      var orderIds = currentOrder.map(function (i) { return i.id; });
+      STATE.decisions.push({ scene: scene.id, type: 'dragdrop', value: orderIds });
+
+      var fb = make('div', 'feedback-block');
+      var fbt = make('p', 'feedback-text');
+      fbt.textContent = act.feedback;
+      fb.appendChild(fbt);
+      div.appendChild(fb);
+
       var nextBtn = make('button', 'btn-next');
       nextBtn.textContent = 'Continuar →';
-      nextBtn.addEventListener('click', function () { saveAndAdvance('E05'); });
+      nextBtn.addEventListener('click', function () {
+        saveAndAdvance(act.next);  /* FIX: usa act.next, no hardcodeado */
+      });
       div.appendChild(nextBtn);
     });
     div.appendChild(confirmBtn);
     return div;
   }
 
+  /* ── Identificar Subtexto (E06) ── */
   function buildSubtext(act, scene) {
     var div = make('div', 'subtext-activity');
     var results = {};
-    var labels = { necesita_ayuda: 'Necesita ayuda', a_punto_de_irse: 'A punto de irse', observa_y_sabe: 'Observa y sabe' };
+    var labels = {
+      necesita_ayuda:  'Necesita ayuda',
+      a_punto_de_irse: 'A punto de irse',
+      observa_y_sabe:  'Observa y sabe'
+    };
 
     act.characters.forEach(function (char) {
-      var charCard = make('div', 'subtext-card');
+      var card = make('div', 'subtext-card');
       var nameEl = make('strong', 'subtext-name');
       nameEl.textContent = char.name;
-      charCard.appendChild(nameEl);
+      card.appendChild(nameEl);
       var reactEl = make('p', 'subtext-reaction');
       reactEl.textContent = char.reaction;
-      charCard.appendChild(reactEl);
-
+      card.appendChild(reactEl);
       var btnRow = make('div', 'subtext-btns');
       Object.keys(labels).forEach(function (key) {
         var btn = make('button', 'subtext-btn');
         btn.textContent = labels[key];
         btn.addEventListener('click', function () {
-          charCard.querySelectorAll('.subtext-btn').forEach(function (b) { b.classList.remove('selected'); });
+          card.querySelectorAll('.subtext-btn').forEach(function (b) {
+            b.classList.remove('selected', 'correct', 'incorrect');
+          });
           btn.classList.add('selected');
+          btn.classList.add(key === char.truth ? 'correct' : 'incorrect');
           results[char.name] = key;
-          if (key === char.truth) btn.classList.add('correct');
-          else btn.classList.add('incorrect');
         });
         btnRow.appendChild(btn);
       });
-      charCard.appendChild(btnRow);
-      div.appendChild(charCard);
+      card.appendChild(btnRow);
+      div.appendChild(card);
     });
 
     var confirmBtn = make('button', 'btn-confirm');
-    confirmBtn.textContent = 'Confirmar lectura';
+    confirmBtn.textContent = 'Confirmar lectura del grupo';
     confirmBtn.addEventListener('click', function () {
-      act.onComplete(results);
       confirmBtn.disabled = true;
+      STATE.decisions.push({ scene: scene.id, type: 'subtext', value: results });
+
       var fb = make('div', 'feedback-block');
-      fb.innerHTML = '<p>Buena lectura del subtexto. Ahora decide qué hace Jordi.</p>';
+      fb.innerHTML = '<p><strong>Buena lectura del subtexto.</strong> Ahora decide qué hace Jordi.</p>';
       div.appendChild(fb);
+
+      /* FIX E06: inyectar la decisionActivity DESPUÉS del confirm */
+      if (scene.decisionActivity) {
+        var decWrapper = buildActivity(scene.decisionActivity, scene);
+        var container = el('scene-container');
+        /* Insertar antes del hook-line (último elemento) */
+        var hook = container.querySelector('.hook-line');
+        if (hook) container.insertBefore(decWrapper, hook);
+        else container.appendChild(decWrapper);
+        /* Los botones de la decisión NO pasan por el lock inicial, ya están desbloqueados */
+      }
     });
     div.appendChild(confirmBtn);
     return div;
   }
 
-  function buildWordAnchor(act, scene) {
+  /* ── Word Anchor ── */
+  function buildWordAnchor(act) {
     var div = make('div', 'word-anchor-activity');
     act.words.forEach(function (word) {
       var btn = make('button', 'word-btn');
@@ -1167,16 +1238,14 @@
       btn.addEventListener('click', function () {
         div.querySelectorAll('.word-btn').forEach(function (b) { b.classList.remove('selected'); });
         btn.classList.add('selected');
-        var anchor = act.anchors[word];
-        var existing = div.querySelector('.word-anchor-result');
-        if (existing) existing.remove();
+        var old = div.querySelector('.word-anchor-result');
+        if (old) old.remove();
         var res = make('div', 'word-anchor-result');
-        res.innerHTML = '<p><strong>' + word + ':</strong> ' + anchor + '</p>';
+        res.innerHTML = '<p><strong>' + word + ':</strong> ' + act.anchors[word] + '</p>';
         div.appendChild(res);
-
-        var nextBtn = div.querySelector('.btn-next');
-        if (!nextBtn) {
-          nextBtn = make('button', 'btn-next');
+        var existing = div.querySelector('.btn-next');
+        if (!existing) {
+          var nextBtn = make('button', 'btn-next');
           nextBtn.textContent = 'Continuar →';
           nextBtn.addEventListener('click', function () { act.onSelect(word); });
           div.appendChild(nextBtn);
@@ -1187,88 +1256,93 @@
     return div;
   }
 
-  function buildInfo(act) {
+  /* ── Info (solo botón de avance) ── */
+  function buildInfo(act, scene) {
     var div = make('div', 'info-activity');
     var btn = make('button', 'btn-next btn-large');
     btn.textContent = act.buttonLabel || 'Continuar →';
-    btn.addEventListener('click', act.onSelect);
+    btn.addEventListener('click', function () {
+      /* FIX: usa act.next si está definido; si no, act.onSelect heredado */
+      if (act.next) saveAndAdvance(act.next);
+      else if (act.onSelect) act.onSelect();
+    });
     div.appendChild(btn);
     return div;
   }
 
-  /* ════════════════════════════════════════════════
+  /* ══════════════════════════════════════════════════════
      EPÍLOGO FINAL
-  ════════════════════════════════════════════════ */
-
+  ══════════════════════════════════════════════════════ */
   function showFinalEpilogue() {
-    var key = getEpilogueKey();
-    var epi = EPILOGUES[key];
+    var key  = getEpilogueKey();
+    var epi  = EPILOGUES[key];
     var container = el('scene-container');
     container.innerHTML = '';
-    container.classList.add('scene-final');
+    container.removeAttribute('style');
+    container.className = 'scene-final';
 
-    var results = make('div', 'results-screen');
+    var screen = make('div', 'results-screen');
 
-    var profileTitle = make('h2', 'results-profile-title');
-    profileTitle.textContent = 'Perfil de Liderazgo Desbloqueado';
-    results.appendChild(profileTitle);
+    var ptitle = make('h2', 'results-profile-title');
+    ptitle.textContent = 'Perfil de Liderazgo Desbloqueado';
+    screen.appendChild(ptitle);
 
-    var profileName = make('div', 'results-profile-name profile-' + STATE.leadershipProfile);
-    profileName.textContent = epi.title;
-    results.appendChild(profileName);
+    var pname = make('div', 'results-profile-name profile-' + STATE.leadershipProfile);
+    pname.textContent = epi.title;
+    screen.appendChild(pname);
 
-    var scoreBar = make('div', 'results-score-bar');
-    var fill = make('div', 'results-score-fill');
-    fill.style.width = STATE.score + '%';
-    scoreBar.appendChild(fill);
-    var scoreLabel = make('p', 'results-score-label');
-    scoreLabel.textContent = 'Puntuación: ' + STATE.score + ' / 100';
-    results.appendChild(scoreBar);
-    results.appendChild(scoreLabel);
+    var strack = make('div', 'results-score-bar');
+    var sfill  = make('div', 'results-score-fill');
+    sfill.style.width = '0%';
+    strack.appendChild(sfill);
+    screen.appendChild(strack);
+    setTimeout(function () { sfill.style.width = Math.min(STATE.score, 100) + '%'; }, 300);
+
+    var slabel = make('p', 'results-score-label');
+    slabel.textContent = 'Puntuación: ' + STATE.score + ' / 100';
+    screen.appendChild(slabel);
 
     /* Badges */
-    var badgeRow = make('div', 'results-badges');
-    STATE.badgesUnlocked.forEach(function (bid) {
-      var bdef = BADGE_DEFS[bid];
-      if (!bdef) return;
-      var bEl = make('div', 'badge-display');
-      bEl.innerHTML = bdef.icon + '<span>' + bdef.label + '</span>';
-      badgeRow.appendChild(bEl);
-    });
-    results.appendChild(badgeRow);
+    if (STATE.badgesUnlocked.length) {
+      var brow = make('div', 'results-badges');
+      STATE.badgesUnlocked.forEach(function (bid) {
+        var bd = BADGE_DEFS[bid];
+        if (!bd) return;
+        var bel = make('div', 'badge-display');
+        bel.innerHTML = bd.icon + ' <span>' + bd.label + '</span>';
+        brow.appendChild(bel);
+      });
+      screen.appendChild(brow);
+    }
 
-    /* Narrative */
-    var text = make('div', 'results-text');
-    text.textContent = epi.textFull || epi.text;
-    results.appendChild(text);
+    var textEl = make('div', 'results-text');
+    textEl.textContent = epi.text;
+    screen.appendChild(textEl);
 
-    /* Concept */
-    var concept = make('p', 'results-concept');
-    concept.innerHTML = '<strong>Concepto de liderazgo:</strong> ' + epi.concept;
-    results.appendChild(concept);
+    var conceptEl = make('p', 'results-concept');
+    conceptEl.innerHTML = '<strong>Concepto de liderazgo:</strong> ' + epi.concept;
+    screen.appendChild(conceptEl);
 
-    /* Action */
-    var action = make('div', 'results-action');
-    action.innerHTML = '<strong>Recomendación post-curso:</strong> ' + epi.action;
-    results.appendChild(action);
+    var actionEl = make('div', 'results-action');
+    actionEl.innerHTML = '<strong>Recomendación post-curso:</strong> ' + epi.action;
+    screen.appendChild(actionEl);
 
-    /* End question */
-    var eq = make('blockquote', 'results-endquestion');
-    eq.textContent = epi.endQuestion;
-    results.appendChild(eq);
+    var eqEl = make('blockquote', 'results-endquestion');
+    eqEl.textContent = epi.endQuestion;
+    screen.appendChild(eqEl);
 
-    /* Alternative paths summary */
-    var altSummary = make('div', 'alt-paths-summary');
-    altSummary.innerHTML = '<h4>Los tres caminos posibles</h4>';
+    /* Tres finales comparados */
+    var altSum = make('div', 'alt-paths-summary');
+    altSum.innerHTML = '<h4>Los tres caminos posibles</h4>';
     ['A', 'B', 'C'].forEach(function (k) {
-      var ep = EPILOGUES[k];
-      var card = make('div', 'alt-path-mini' + (k === key ? ' highlight' : ''));
-      card.innerHTML = '<strong>' + ep.title + '</strong><br/><small>' + ep.scoreRange + '</small><p>' + ep.text.substring(0, 120) + '…</p>';
-      altSummary.appendChild(card);
+      var ep2 = EPILOGUES[k];
+      var mc = make('div', 'alt-path-mini' + (k === key ? ' highlight' : ''));
+      mc.innerHTML = '<strong>' + ep2.title + '</strong> <small>' + ep2.scoreRange + '</small>' +
+                     '<p>' + ep2.text.substring(0, 130) + '…</p>';
+      altSum.appendChild(mc);
     });
-    results.appendChild(altSummary);
+    screen.appendChild(altSum);
 
-    /* Restart */
     var restartBtn = make('button', 'btn-restart');
     restartBtn.textContent = 'Volver a empezar desde E01';
     restartBtn.addEventListener('click', function () {
@@ -1276,33 +1350,38 @@
       SCORM.saveState(STATE);
       renderScene('E01');
     });
-    results.appendChild(restartBtn);
+    screen.appendChild(restartBtn);
 
-    container.appendChild(results);
+    container.appendChild(screen);
 
+    /* Marcar completado en SCORM */
     STATE.completed = true;
     SCORM.saveState(STATE);
     SCORM.finish();
   }
 
-  /* ════════════════════════════════════════════════
+  /* ══════════════════════════════════════════════════════
      BADGE NOTIFICATION
-  ════════════════════════════════════════════════ */
-
+  ══════════════════════════════════════════════════════ */
   function showBadgeNotification(badgeId) {
-    var bdef = BADGE_DEFS[badgeId];
-    if (!bdef) return;
+    var bd = BADGE_DEFS[badgeId];
+    if (!bd) return;
     var notif = make('div', 'badge-notification');
-    notif.innerHTML = '<span class="badge-icon">' + bdef.icon + '</span><span class="badge-label">+<strong>' + bdef.label + '</strong> desbloqueado</span>';
+    notif.innerHTML = '<span class="badge-icon">' + bd.icon + '</span>' +
+                      '<span class="badge-label">+<strong>' + bd.label + '</strong> desbloqueado</span>';
     document.body.appendChild(notif);
-    setTimeout(function () { notif.classList.add('show'); }, 50);
-    setTimeout(function () { notif.classList.remove('show'); setTimeout(function () { notif.remove(); }, 400); }, 3000);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { notif.classList.add('show'); });
+    });
+    setTimeout(function () {
+      notif.classList.remove('show');
+      setTimeout(function () { notif.remove(); }, 400);
+    }, 3000);
   }
 
-  /* ════════════════════════════════════════════════
+  /* ══════════════════════════════════════════════════════
      RESET
-  ════════════════════════════════════════════════ */
-
+  ══════════════════════════════════════════════════════ */
   function resetState() {
     STATE.currentScene = 'E01';
     STATE.score = 0;
@@ -1316,41 +1395,22 @@
     STATE.completed = false;
   }
 
-  /* ════════════════════════════════════════════════
-     DOM HELPERS
-  ════════════════════════════════════════════════ */
-
-  function el(id) { return document.getElementById(id); }
-  function make(tag, className) {
-    var e = document.createElement(tag);
-    if (className) e.className = className;
-    return e;
-  }
-
-  function emotionIconLabel(icon) {
-    var map = {
-      tension: '⚡ Tensión',
-      apertura: '◎ Apertura',
-      resistencia: '◈ Resistencia',
-      quiebre: '◆ Quiebre',
-      reconexion: '◉ Reconexión',
-      transformacion: '✦ Transformación'
-    };
-    return map[icon] || icon;
-  }
-
-  /* ════════════════════════════════════════════════
+  /* ══════════════════════════════════════════════════════
      INIT
-  ════════════════════════════════════════════════ */
-
+  ══════════════════════════════════════════════════════ */
   function init() {
     SCORM.initialize();
     var saved = SCORM.loadState();
-    if (saved) {
-      Object.assign(STATE, saved);
+    if (saved && typeof saved === 'object') {
+      /* Restaurar solo campos primitivos/arrays, no funciones */
+      var safe = ['currentScene','score','decisions','leadershipProfile',
+                  'badgesUnlocked','groupTemperature','alternativePathViewed',
+                  'routeTaken','canonicalProgress','completed'];
+      safe.forEach(function (k) {
+        if (saved[k] !== undefined) STATE[k] = saved[k];
+      });
     }
     renderScene(STATE.currentScene);
-    updateHUD();
   }
 
   document.addEventListener('DOMContentLoaded', init);
