@@ -30,7 +30,15 @@
     <resource identifier="resource_01" type="webcontent"
               adlcp:scormtype="sco" href="index.html">
       <file href="index.html"/>
+      <file href="css/fonts.css"/>
       <file href="css/style.css"/>
+      <file href="css/fonts/inter-400.woff2"/>
+      <file href="css/fonts/inter-600.woff2"/>
+      <file href="css/fonts/inter-700.woff2"/>
+      <file href="css/fonts/playfair-italic-400.woff2"/>
+      <file href="css/fonts/playfair-italic-700.woff2"/>
+      <file href="css/fonts/roboto-mono-400.woff2"/>
+      <file href="css/fonts/roboto-mono-500.woff2"/>
       <file href="js/scorm.js"/>
       <file href="js/scenario.js"/>
     </resource>
